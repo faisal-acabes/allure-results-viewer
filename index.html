@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Allure Results Viewer</title>
+<style>
+:root{font:14px/1.5 Inter,Segoe UI,Arial,sans-serif;color:#243247;background:#f3f5f8;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0}
+button,input,select{font:inherit}
+button{cursor:pointer}
+h1,h2,h3,p{margin-top:0}
+.wrap{min-height:100vh}
+header{min-height:70px;padding:13px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;background:#fff;border-bottom:1px solid #dce3eb}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:38px;height:38px;display:grid;place-items:center;background:#173b67;border-radius:6px;color:#fff;font-size:19px;font-weight:700}
+h1{font-size:1.1rem;line-height:1.2;margin:0;font-weight:700;letter-spacing:.01em}
+h2{font-size:1.1rem}
+.muted{color:#66788d}
+.small{font-size:.83rem}
+.actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.pick,.back-button{display:inline-block;border:1px solid #b9c8d9;background:#fff;border-radius:6px;padding:8px 12px;color:#254160;font-weight:600;cursor:pointer}
+.pick:hover,.back-button:hover{background:#edf3fa;border-color:#6a8eb8}
+.pick:first-child{background:#174d83;border-color:#174d83;color:#fff}
+.pick:first-child:hover{background:#0e3f70}
+.pick:focus-within,.back-button:focus-visible,.row:focus-visible,.timeline-step:focus-visible{outline:2px solid #176ac4;outline-offset:2px}
+.pick input{position:absolute;width:1px;height:1px;opacity:0}
+.hidden{display:none!important}
+.notice{max-width:1280px;margin:16px auto;padding:11px 14px;background:#fff1f0;border:1px solid #e7bbb7;border-radius:6px;color:#a2322a}
+.panel{background:#fff;border:1px solid #dce3eb;border-radius:8px}
+.intro{max-width:650px;margin:10vh auto;padding:32px;text-align:center}
+#report{max-width:1320px;margin:auto;padding:25px 28px 35px}
+.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:end;margin:0 0 18px}
+.toolbar label{display:grid;gap:5px;color:#52657a;font-size:.83rem;font-weight:600}
+.toolbar input,.toolbar select{min-height:38px;padding:7px 10px;border:1px solid #bdcbd9;border-radius:6px;background:#fff;color:#243247}
+#search{min-width:min(340px,75vw)}
+#runSelect{max-width:min(470px,85vw)}
+.summary{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:18px}
+.metric{padding:12px 16px}
+.metric strong{display:block;font-size:1.45rem;line-height:1.2;color:#243247;font-variant-numeric:tabular-nums}
+.metric strong.passed{color:#177a4d}.metric strong.failed{color:#b63136}.metric strong.broken{color:#a65a08}
+.metric span{font-size:.78rem;color:#66788d;text-transform:uppercase;letter-spacing:.05em}
+.layout{display:grid;grid-template-columns:minmax(220px,300px) minmax(0,1fr);gap:14px;align-items:start}
+.pane{min-height:400px}
+.pane-title{margin:0;padding:16px 17px 10px;border-bottom:1px solid #e3e9ef;color:#53677d;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em}
+.items{max-height:65vh;overflow:auto;padding:8px}
+.row{width:100%;border:1px solid transparent;border-radius:6px;background:transparent;color:#243247;text-align:left;padding:10px 11px;display:flex;align-items:flex-start;gap:10px}
+.row:hover{background:#f1f5fa}.row.active{background:#e9f1fb;border-color:#c8d9ed}
+.row .grow{flex:1;min-width:0;overflow-wrap:anywhere}
+.count{color:#66788d;font-size:.8rem}
+.dot{width:8px;height:8px;border-radius:50%;margin-top:6px;flex:none;background:#9faaba}
+.dot.passed{background:#219765}.dot.failed{background:#d04449}.dot.broken{background:#d1821d}.dot.skipped,.dot.unknown{background:#9faaba}
+.passed{color:#177a4d}.failed{color:#b63136}.broken{color:#a65a08}.skipped,.unknown{color:#66788d}
+.empty{padding:14px;color:#66788d}
+footer{text-align:center;color:#75879b;font-size:.78rem;margin-top:16px}
+#workspace{padding:16px 28px 28px}
+.workspace-bar{display:flex;align-items:center;gap:13px;margin-bottom:13px}
+.speed-control{display:flex;align-items:center;gap:7px;color:#52677d;font-size:.83rem;font-weight:600}.speed-control select{min-height:35px;padding:5px 8px;border:1px solid #b9c8d9;border-radius:5px;background:#fff;color:#243247}
+#workspaceMeta{color:#52677d;font-size:.83rem;overflow-wrap:anywhere}
+.detail{padding:0;border:0;background:transparent;overflow-wrap:anywhere}
+.detail>h2{font-size:1.34rem;line-height:1.3;margin:0 0 6px}
+.detail>strong{font-size:.77rem;letter-spacing:.06em}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin:11px 0 15px}
+.chip{font-size:.77rem;color:#52677d;padding:3px 9px;border:1px solid #ced9e4;border-radius:4px;background:#fff}
+.section{margin-top:16px}.section h3{font-size:.82rem;color:#53677d;text-transform:uppercase;letter-spacing:.06em;margin:0 0 9px}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f7f9fb;border:1px solid #dce3eb;border-radius:6px;padding:11px;max-height:350px;overflow:auto;color:#243247;font-size:.81rem}
+details{border:1px solid #dce3eb;border-radius:6px;margin:7px 0;padding:8px 10px}
+summary{cursor:pointer}
+.attachment{border:1px solid #dce3eb;border-radius:6px;margin:8px 0;padding:10px;background:#fff}
+.attachment img{display:block;max-width:100%;max-height:400px;object-fit:contain;margin-top:8px}
+.attachment a,.screenshot-link{color:#15599c}
+.thumbnail-strip{display:flex;gap:9px;overflow-x:auto;overflow-y:hidden;padding:10px;margin-bottom:10px;background:#fff;border:1px solid #dce3eb;border-radius:8px;scrollbar-width:thin}
+.thumbnail-item{display:flex;align-items:center;gap:8px;flex:none;width:168px;height:78px;padding:5px;border:1px solid #dce3eb;border-radius:6px;background:#fff;color:#243247;text-align:left}
+.thumbnail-item:hover{background:#f1f5fa}.thumbnail-item.active{border-color:#175a9e;background:#e9f1fb}
+.thumbnail-item img{width:64px;height:64px;object-fit:contain;background:#f5f7fa;border-radius:3px}
+.thumbnail-item span{font-size:.78rem;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3}
+.timeline-view{display:grid;grid-template-columns:minmax(300px,.84fr) minmax(0,1.16fr);gap:14px;height:calc(100vh - 350px);min-height:340px}
+.timeline-rail,.timeline-side{background:#fff;border:1px solid #dce3eb;border-radius:8px;overflow:auto}
+.timeline-rail{padding:10px 14px 10px 24px}
+.timeline-step{position:relative;display:flex;gap:10px;align-items:flex-start;width:100%;border:0;border-left:2px solid #d2dce7;border-radius:0;background:#fff;color:#243247;text-align:left;padding:10px 10px 10px 7px}
+.timeline-step:hover{background:#f4f7fb}.timeline-step.active{background:#e9f1fb;border-left-color:#175a9e}
+.timeline-node{width:12px;height:12px;border:2px solid #9faaba;background:#fff;border-radius:50%;flex:none;margin:4px 0 0 -14px}
+.timeline-node.passed{border-color:#219765}.timeline-node.failed{border-color:#d04449}.timeline-node.broken{border-color:#d1821d}
+.timeline-copy{display:grid;gap:3px;min-width:0}.timeline-name{font-weight:600;overflow-wrap:anywhere}
+.timeline-side{padding:18px 20px;display:flex;flex-direction:column;min-height:0}
+.timeline-side .pane-title{padding:0 0 10px;margin-bottom:12px}
+.screenshot-link{display:grid;place-items:center;flex:none;width:100%;max-height:min(42vh,380px);margin:12px 0;background:#f7f9fb;border:1px solid #e3e9ef;border-radius:6px;padding:10px;cursor:zoom-in}
+.screenshot-image{display:block;width:auto;height:auto;max-width:100%;max-height:min(38vh,340px);object-fit:contain}
+.timeline-side .section{border-top:1px solid #e3e9ef;padding-top:13px;margin-top:10px;max-height:155px;overflow:auto;flex:none}
+#imageDialog{width:min(96vw,1800px);max-width:none;height:94vh;max-height:none;padding:0;border:1px solid #adbccc;border-radius:8px;background:#172332;color:#fff;box-shadow:0 25px 70px #11182766}
+#imageDialog::backdrop{background:#101b2bc9}
+.lightbox-bar{height:54px;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:10px 18px;border-bottom:1px solid #465467;font-weight:600}
+.lightbox-bar button{border:1px solid #8fa0b3;background:#2d3c4e;color:#fff;border-radius:5px;padding:6px 12px}
+#largeImage{display:block;width:100%;height:calc(100% - 54px);object-fit:contain;padding:12px}
+@media(max-width:850px){.summary{grid-template-columns:repeat(3,1fr)}.timeline-view{grid-template-columns:1fr;height:auto}.timeline-rail{max-height:42vh}.timeline-side{min-height:380px}.screenshot-image{max-height:min(38vh,340px)}}
+@media(max-width:610px){header,#report,#workspace{padding-left:16px;padding-right:16px}.layout{grid-template-columns:1fr}.pane{min-height:0}.items{max-height:300px}.summary{grid-template-columns:repeat(2,1fr)}.workspace-bar{flex-wrap:wrap}}
+</style>
+</head>
+<body><div class="wrap">
+<header><div class="brand"><div class="logo" aria-hidden="true">A</div><div><h1>Allure Results Viewer</h1><div class="muted small">Browse test execution results locally</div></div></div><div class="actions"><label class="pick">Open JSON files<input id="jsonInput" type="file" accept=".json,application/json" multiple aria-label="Choose Allure result JSON files"></label><label class="pick secondary">Open results folder<input id="folderInput" type="file" webkitdirectory directory multiple aria-label="Choose an Allure results folder with attachments"></label></div></header>
+<div id="notice" class="notice hidden" role="alert"></div>
+<section id="intro" class="intro panel"><h2>Inspect a test run</h2><p class="muted">Open one or more <code>*-result.json</code> files to view test results. To include screenshots and other attachments, choose the entire <code>allure-results</code> folder instead.</p><p class="muted small">The folder picker shows folders rather than JSON files and may use the word “Upload.” Your files are opened locally and are not sent anywhere.</p></section>
+<main id="report" class="hidden"><div class="toolbar"><label id="runControl" class="hidden">Result folder<select id="runSelect"></select></label><label>Search tests<input id="search" type="search" placeholder="Name, suite, or error"></label><label>Status<select id="statusFilter"><option value="all">All statuses</option><option value="failed">Failed</option><option value="broken">Broken</option><option value="passed">Passed</option><option value="skipped">Skipped</option><option value="unknown">Unknown</option></select></label><label>Device<select id="deviceFilter"><option value="all">All devices</option></select></label><label>Platform<select id="platformFilter"><option value="all">All platforms</option></select></label></div><div id="summary" class="summary" aria-label="Run summary"></div><div class="layout"><nav class="pane panel" aria-label="Suites"><h2 class="pane-title">Select a suite</h2><div id="suites" class="items"></div></nav><section class="pane panel" aria-label="Tests"><h2 id="listTitle" class="pane-title">Select a test</h2><div id="tests" class="items"></div></section></div><footer id="footer"></footer></main>
+<main id="workspace" class="hidden"><div class="workspace-bar"><button id="backButton" class="back-button" type="button">← Suites and tests</button><button id="playButton" class="back-button" type="button" aria-pressed="false">Play steps</button><label class="speed-control">Playback speed<select id="playbackSpeed" aria-label="Playback speed"><option value="3600">0.5×</option><option value="1800" selected>1×</option><option value="900">2×</option><option value="450">4×</option></select></label><span id="workspaceMeta"></span></div><article id="detail" class="detail" aria-label="Test timeline and screenshot"></article></main>
+</div><dialog id="imageDialog" aria-label="Enlarged screenshot"><div class="lightbox-bar"><span id="imageCaption"></span><button id="closeImage" type="button">Close</button></div><img id="largeImage" alt="Enlarged step screenshot"></dialog><script>
+'use strict';
+const $=id=>document.getElementById(id), state={runs:[],run:0,suite:'all',selected:null,urls:[],timeline:null,timer:null};
+const statuses=['passed','failed','broken','skipped','unknown'];
+function tagValue(test,kind){
+  const names=kind==='device'?['device','deviceName','device_name']:['platform','platformName','platform_name','os','operatingSystem'];
+  const entries=[...(test.labels||[]),...(test.parameters||[])];
+  const match=entries.find(x=>x&&names.some(name=>name.toLowerCase()===String(x.name||'').toLowerCase())&&x.value&&x.mode!=='hidden'&&x.mode!=='masked');
+  if(match)return String(match.value);
+  if(kind==='platform'){
+    const device=tagValue(test,'device');
+    if(/android/i.test(device))return 'Android';
+    if(/ios|iphone|ipad/i.test(device))return 'iOS';
+  }
+  return '';
+}
+function populateTagFilters(){
+  for(const kind of ['device','platform']){
+    const select=$(kind+'Filter'),previous=select.value,values=[...new Set(run().tests.map(t=>tagValue(t,kind)).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+    select.replaceChildren();const all=add(select,'option','',kind==='device'?'All devices':'All platforms');all.value='all';
+    for(const value of values){const option=add(select,'option','',value);option.value=value}
+    select.value=values.includes(previous)?previous:'all';
+  }
+}
+function make(tag,cls,value){const n=document.createElement(tag);if(cls)n.className=cls;if(value!==undefined)n.textContent=String(value);return n}
+function add(parent,tag,cls,value){const n=make(tag,cls,value);parent.append(n);return n}
+function status(value){return statuses.includes(value)?value:'unknown'}
+function duration(start,stop){const ms=Number(stop)-Number(start);if(!Number.isFinite(ms)||ms<0)return '—';if(ms<1000)return ms+' ms';if(ms<60000)return (ms/1000).toFixed(1)+' s';return Math.floor(ms/60000)+'m '+Math.round(ms%60000/1000)+'s'}
+function suiteOf(test){const labels=Array.isArray(test.labels)?test.labels:[], get=name=>labels.find(x=>x?.name===name&&x.value)?.value;return [get('parentSuite'),get('suite'),get('subSuite')].filter(Boolean).join(' / ')||(Array.isArray(test.titlePath)&&test.titlePath.at(-1))||'Ungrouped'}
+function pathOf(file){return (file.webkitRelativePath||file.name).replaceAll('\\','/')}
+function dirOf(path){const i=path.lastIndexOf('/');return i<0?'':path.slice(0,i)}
+function notice(message){$('notice').textContent=message;$('notice').classList.toggle('hidden',!message)}
+function stopPlayback(){if(state.timer!==null){clearInterval(state.timer);state.timer=null}const button=$('playButton');button.textContent='Play steps';button.setAttribute('aria-pressed','false')}
+function togglePlayback(){
+  if(state.timer!==null){stopPlayback();return}
+  const timeline=state.timeline;if(!timeline||timeline.length<2)return;
+  if(timeline.current()>=timeline.length-1)timeline.select(0,true);
+  const button=$('playButton');button.textContent='Pause';button.setAttribute('aria-pressed','true');
+  state.timer=setInterval(()=>{const next=timeline.current()+1;if(next>=timeline.length){stopPlayback();return}timeline.select(next,true);if(next===timeline.length-1)stopPlayback()},Number($('playbackSpeed').value)||1800);
+}
+function revoke(){for(const url of state.urls)URL.revokeObjectURL(url);state.urls=[]}
+function urlOf(file){const url=URL.createObjectURL(file);state.urls.push(url);return url}
+async function loadFiles(fileList){stopPlayback();state.timeline=null;closeImage();notice('');const files=Array.from(fileList||[]),resultFiles=files.filter(f=>/-result\.json$/i.test(f.name));if(!resultFiles.length){notice('No *-result.json files found. Choose result JSON files or an allure-results folder.');return}const groups=new Map(),errors=[];for(const file of resultFiles){try{const test=JSON.parse(await file.text());if(!test||typeof test!=='object'||Array.isArray(test))throw Error('Expected a JSON object');const path=pathOf(file),dir=dirOf(path);if(!groups.has(dir))groups.set(dir,{name:dir||'Selected files',tests:[],files:new Map()});groups.get(dir).tests.push({...test,_file:path,_suite:suiteOf(test),_status:status(test.status)})}catch(error){errors.push(file.name+': '+error.message)}}if(!groups.size){notice('Could not read result files. '+errors.slice(0,2).join(' '));return}for(const file of files){const group=groups.get(dirOf(pathOf(file)));if(group)group.files.set(file.name,file)}revoke();state.runs=Array.from(groups.values()).sort((a,b)=>a.name.localeCompare(b.name));state.run=0;state.suite='all';state.selected=null;const selector=$('runSelect');selector.replaceChildren();for(const [i,run] of state.runs.entries()){const option=add(selector,'option','',run.name+' ('+run.tests.length+')');option.value=String(i)}$('runControl').classList.toggle('hidden',state.runs.length<2);$('deviceFilter').value='all';$('platformFilter').value='all';populateTagFilters();$('intro').classList.add('hidden');$('workspace').classList.add('hidden');$('report').classList.remove('hidden');if(errors.length)notice(errors.length+' result file(s) could not be read. '+errors.slice(0,2).join(' '));render()}
+function run(){return state.runs[state.run]}
+function visible(){const q=$('search').value.trim().toLowerCase(),s=$('statusFilter').value,device=$('deviceFilter').value,platform=$('platformFilter').value;return run().tests.filter(t=>(state.suite==='all'||t._suite===state.suite)&&(s==='all'||t._status===s)&&(device==='all'||tagValue(t,'device')===device)&&(platform==='all'||tagValue(t,'platform')===platform)&&(!q||[t.name,t.fullName,t._suite,t.statusDetails?.message,tagValue(t,'device'),tagValue(t,'platform')].some(v=>String(v||'').toLowerCase().includes(q)))).sort((a,b)=>(Number(a.start)||0)-(Number(b.start)||0))}
+function summary(){const holder=$('summary');holder.replaceChildren();const tests=run().tests,counts=Object.fromEntries(statuses.map(s=>[s,tests.filter(t=>t._status===s).length]));for(const [label,value,cls] of [['Total',tests.length,''],['Passed',counts.passed,'passed'],['Failed',counts.failed,'failed'],['Broken',counts.broken,'broken'],['Skipped',counts.skipped,'skipped'],['Unknown',counts.unknown,'unknown']]){const card=add(holder,'div','metric panel');add(card,'strong',cls,value);add(card,'span','',label)}}
+function suites(){const holder=$('suites');holder.replaceChildren();const counts=new Map();for(const t of run().tests)counts.set(t._suite,(counts.get(t._suite)||0)+1);for(const [name,count] of [['all',run().tests.length],...Array.from(counts).sort((a,b)=>a[0].localeCompare(b[0]))]){const b=add(holder,'button','row'+(state.suite===name?' active':''));b.type='button';b.setAttribute('aria-pressed',String(state.suite===name));add(b,'span','grow',name==='all'?'All suites':name);add(b,'span','count',count);b.addEventListener('click',()=>{state.suite=name;state.selected=null;render()})}}
+function tests(){const holder=$('tests'),items=visible();holder.replaceChildren();$('listTitle').textContent='Tests · '+items.length;if(!items.length)add(holder,'div','empty','No tests match these filters.');if(!items.some(t=>t._file===state.selected))state.selected=items[0]?._file||null;for(const t of items){const b=add(holder,'button','row'+(state.selected===t._file?' active':''));b.type='button';b.setAttribute('aria-pressed',String(state.selected===t._file));add(b,'span','dot '+t._status);const body=add(b,'span','grow');add(body,'div','',t.name||t.fullName||'Unnamed test');add(body,'div','muted small',[t._status,duration(t.start,t.stop),...new Set([tagValue(t,'device'),tagValue(t,'platform')].filter(Boolean))].join(' · '));b.addEventListener('click',()=>openTest(t))}}
+function section(parent,title){const box=add(parent,'section','section');add(box,'h3','',title);return box}
+function attachments(parent,list){for(const a of list||[]){const box=add(parent,'div','attachment');add(box,'div','small',a.name||a.source||'Attachment');const file=run().files.get(a.source);if(!file){add(box,'div','muted small','Attachment file unavailable');continue}const type=a.type||file.type||'',link=add(box,'a','small','Open / download');link.href=urlOf(file);link.download=a.name||file.name;link.target='_blank';link.rel='noopener';if(type.startsWith('image/')){const img=add(box,'img','');img.src=link.href;img.alt=a.name||'Screenshot'}else if(/^(text\/|application\/(json|xml))/.test(type)&&file.size<1024*1024){const pre=add(box,'pre','','Loading preview…');file.text().then(text=>{pre.textContent=text}).catch(()=>{pre.textContent='Preview unavailable'})}}}
+function timelineEntries(steps,depth=0,output=[]){for(const step of steps||[]){output.push({step,depth});timelineEntries(step.steps,depth+1,output)}return output}
+function imageAttachment(attachments){return [...(attachments||[])].reverse().find(a=>a&&(/^(image\/)/i.test(a.type||'')||/\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(a.source||'')))}
+function screenshotForEntry(test,entries,index){const current=imageAttachment(entries[index].step.attachments);if(current)return {attachment:current,label:'Screenshot from this step'};for(let i=index-1;i>=0;i--){const earlier=imageAttachment(entries[i].step.attachments);if(earlier)return {attachment:earlier,label:'Latest screenshot · '+(entries[i].step.name||'earlier step')}}const runImage=imageAttachment(test.attachments);return runImage?{attachment:runImage,label:'Run screenshot'}:null}
+function openImage(url,caption){stopPlayback();$('largeImage').src=url;$('largeImage').alt=caption||'Step screenshot';$('imageCaption').textContent=caption||'Step screenshot';$('imageDialog').showModal()}
+function closeImage(){if($('imageDialog').open)$('imageDialog').close()}
+function renderTimeline(parent,test){
+  const entries=timelineEntries(test.steps),strip=add(parent,'div','thumbnail-strip'),grid=add(parent,'div','timeline-view');
+  const rail=add(grid,'div','timeline-rail'),side=add(grid,'div','timeline-side');
+  const buttons=[],thumbs=[];let current=0;
+  function select(index,follow=false,preferredAttachment=null){current=index;
+    for(const [i,button] of buttons.entries()){button.classList.toggle('active',i===index);button.setAttribute('aria-pressed',String(i===index))}
+    side.replaceChildren();
+    if(follow){side.scrollTop=0;buttons[index].scrollIntoView({block:'nearest',inline:'nearest',behavior:'smooth'})}
+    const entry=entries[index],step=entry.step;
+    add(side,'div','pane-title','Step screenshot');
+    const shot=preferredAttachment?{attachment:preferredAttachment,label:'Screenshot from this step'}:screenshotForEntry(test,entries,index);
+    for(const thumb of thumbs){const active=thumb.attachment===shot?.attachment;thumb.button.classList.toggle('active',active);thumb.button.setAttribute('aria-pressed',String(active));if(active&&follow)thumb.button.scrollIntoView({block:'nearest',inline:'nearest',behavior:'smooth'})}
+    if(shot){
+      add(side,'div','muted small',shot.label);
+      const file=run().files.get(shot.attachment.source);
+      if(file){
+        const url=urlOf(file),button=add(side,'button','screenshot-link');button.type='button';
+        button.setAttribute('aria-label','Enlarge screenshot: '+(shot.attachment.name||step.name||'Step'));
+        const img=add(button,'img','screenshot-image');img.src=url;img.alt=shot.attachment.name||'Step screenshot';
+        button.addEventListener('click',()=>openImage(url,shot.attachment.name||step.name));
+        add(side,'div','muted small','Select the image to open it full size.');
+      }else add(side,'div','empty','Screenshot file unavailable. Open the results folder to include attachments.');
+    }else add(side,'div','empty','No screenshot was captured at or before this step.');
+    const info=section(side,'Step details');
+    add(info,'div','',step.name||'Unnamed step');
+    add(info,'div','muted small',status(step.status)+' · '+duration(step.start,step.stop));
+    if(step.statusDetails?.message)add(info,'pre','',step.statusDetails.message);
+    if(step.statusDetails?.trace){const d=add(info,'details','');add(d,'summary','','Stack trace');add(d,'pre','',step.statusDetails.trace)}
+    const other=(step.attachments||[]).filter(a=>a!==shot?.attachment);
+    if(other.length)attachments(section(info,'Other attachments'),other);
+  }
+  for(const [i,entry] of entries.entries()){
+    const step=entry.step,button=add(rail,'button','timeline-step');button.type='button';
+    button.style.paddingLeft=(5+Math.min(entry.depth,6)*13)+'px';
+    button.setAttribute('aria-label','Step '+(i+1)+': '+(step.name||'Unnamed step'));
+    add(button,'span','timeline-node '+status(step.status));
+    const text=add(button,'span','timeline-copy');add(text,'span','timeline-name',step.name||'Unnamed step');
+    add(text,'span','muted small',(test.start&&step.start?'+'+duration(test.start,step.start)+' · ':'')+duration(step.start,step.stop)+(imageAttachment(step.attachments)?' · Screenshot':''));
+    buttons.push(button);button.addEventListener('click',()=>select(i));
+  }
+  for(const [i,entry] of entries.entries()){
+    for(const attachment of entry.step.attachments||[]){
+      if(!attachment||!(/^(image\/)/i.test(attachment.type||'')||/\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(attachment.source||'')))continue;
+      const file=run().files.get(attachment.source),button=add(strip,'button','thumbnail-item');button.type='button';
+      button.setAttribute('aria-label','Show screenshot from step '+(i+1)+': '+(entry.step.name||'Unnamed step'));
+      if(file){const img=add(button,'img','');img.src=urlOf(file);img.alt=attachment.name||'Screenshot thumbnail';img.loading='lazy'}
+      else add(button,'span','muted','Image unavailable');
+      add(button,'span','',entry.step.name||'Step '+(i+1));
+      thumbs.push({button,attachment});button.addEventListener('click',()=>select(i,true,attachment));
+    }
+  }
+  if(!thumbs.length)strip.classList.add('hidden');
+  state.timeline={select,current:()=>current,length:entries.length};
+  $('playButton').disabled=entries.length<2;
+  select(0);
+}
+function openTest(test){stopPlayback();state.timeline=null;state.selected=test._file;$('workspaceMeta').textContent=test._suite+' / '+(test.name||test.fullName||'Unnamed test');$('report').classList.add('hidden');$('workspace').classList.remove('hidden');detail()}
+function detail(){
+  revoke();const holder=$('detail');holder.replaceChildren();
+  const t=run().tests.find(x=>x._file===state.selected);
+  if(!t){add(holder,'p','muted','Select a test to view its details.');return}
+  add(holder,'h2','',t.name||t.fullName||'Unnamed test');
+  add(holder,'strong',t._status,t._status.toUpperCase());
+  add(holder,'div','muted small',t._suite);
+  const chips=add(holder,'div','chips');
+  add(chips,'span','chip','Duration: '+duration(t.start,t.stop));
+  if(t.start)add(chips,'span','chip','Started: '+new Date(t.start).toLocaleString());
+  for(const p of t.parameters||[]){if(p.mode==='hidden')continue;add(chips,'span','chip',p.name+': '+(p.mode==='masked'?'••••':p.value))}
+  if(t.steps?.length)renderTimeline(section(holder,'Step timeline'),t);
+  else {state.timeline=null;$('playButton').disabled=true;add(section(holder,'Step timeline'),'p','empty','No steps were recorded for this test.')}
+  if(t.statusDetails?.message||t.statusDetails?.trace){const box=section(holder,'Failure');if(t.statusDetails.message)add(box,'pre','',t.statusDetails.message);if(t.statusDetails.trace){const d=add(box,'details','');add(d,'summary','','Stack trace');add(d,'pre','',t.statusDetails.trace)}}
+  if(t.description)add(section(holder,'Description'),'p','',t.description);
+  if(t.attachments?.length)attachments(section(holder,'Test attachments'),t.attachments);
+  if(t.fullName)add(section(holder,'Full name'),'div','muted small',t.fullName);
+}
+function render(){summary();suites();tests();$('footer').textContent=run().name+' · '+run().tests.length+' result files · viewed locally'}
+for(const id of ['jsonInput','folderInput']) $(id).addEventListener('change',event=>{loadFiles(event.target.files).catch(error=>notice('Could not open results: '+error.message));event.target.value=''});
+$('runSelect').addEventListener('change',event=>{state.run=Number(event.target.value);state.suite='all';state.selected=null;populateTagFilters();render()});
+$('backButton').addEventListener('click',()=>{stopPlayback();closeImage();$('workspace').classList.add('hidden');$('report').classList.remove('hidden');tests()});
+$('playButton').addEventListener('click',togglePlayback);
+$('playbackSpeed').addEventListener('change',()=>{if(state.timer!==null){stopPlayback();togglePlayback()}});
+$('search').addEventListener('input',()=>{state.selected=null;tests()});
+$('statusFilter').addEventListener('change',()=>{state.selected=null;tests()});
+$('deviceFilter').addEventListener('change',()=>{state.selected=null;tests()});
+$('platformFilter').addEventListener('change',()=>{state.selected=null;tests()});
+$('closeImage').addEventListener('click',closeImage);
+$('imageDialog').addEventListener('click',event=>{if(event.target===$('imageDialog'))closeImage()});
+</script></body></html>
